@@ -35,5 +35,28 @@ contract Auction {
         _;
     }
 
+    constructor(address _token, uint256 _reservePrice, uint256 _biddingDuration) {
+        owner = msg.sender;
+        token = IERC20(_token);
+        reservePrice = _reservePrice;
+        biddingEndTime = block.timestamp + _biddingDuration;
+    }
+
+    function placeBid(uint256 _amount) external onlyBeforeBiddingEnd auctionNotEnded {
+        require(_amount > highestBid, "Bid amount must be higher than the current highest bid");
+        require(token.transferFrom(msg.sender, address(this), _amount), "Token transfer failed");
+
+        if (highestBidder != address(0)) {
+            // Refund the previous highest bidder
+            require(token.transfer(highestBidder, highestBid), "Bid refund failed");
+        }
+
+        highestBid = _amount;
+        highestBidder = msg.sender;
+
+        emit BidPlaced(msg.sender, _amount);
+    }
+
+
     
 }
