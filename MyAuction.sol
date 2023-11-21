@@ -68,6 +68,13 @@ function endAuction() external onlyOwner onlyAfterBiddingEnd auctionNotEnded {
         }
     }
 
+function withdraw() external onlyAfterBiddingEnd auctionNotEnded {
+        require(msg.sender != highestBidder, "The highest bidder cannot withdraw until the auction ends");
+
+        // Refund the bid amount
+        require(token.transfer(msg.sender, highestBid), "Bid refund failed");
+    }
+
 
     
 }
